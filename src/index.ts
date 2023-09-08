@@ -7,7 +7,7 @@
     MIT License */
 ////////////////////////////////////////////////////
 
-type RegexMap = Array<[RegExp[], (string | (string | RegExp | Function)[])[]]>;
+type RegexMap = ((RegExp[] | (string | (string | RegExp | Function)[])[])[])[];
 
 interface ResultObj {
     [key: string]: any;

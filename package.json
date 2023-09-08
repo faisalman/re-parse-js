@@ -1,7 +1,7 @@
 {
   "title": "REParse.js",
   "name": "re-parse-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Faisal Salman <f@faisalman.com>",
   "description": "Compose a structured data from unstructured text using regex-based pattern matching",
   "type": "commonjs",

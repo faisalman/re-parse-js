@@ -26,6 +26,19 @@ describe('REParse', () => {
             re.use(regexes);
             assert.deepEqual(re.parse(string1), { browser: 'Mozilla', version: '5.0' });
             assert.deepEqual(re.parse(string2), { browser: 'Opera', version: '1.2', major: '1' });
+
+            const regexes2 = [
+                [
+                    [
+                        /(https?):\/\/(\w+\.\w+)\/(.*)\?(.*)/g
+                    ],
+                    ['protocol', 'host', 'path', 'query']
+                ]
+            ];
+            const urlString = 'https://faisalman.com/?ref=github';
+            
+            const re2 = new REParse(regexes2);
+            assert.deepEqual(re2.parse(urlString), { protocol: 'https', host: 'faisalman.com', path: '', query: 'ref=github' });
         });
 
         it('Direct value replacement', () => {   

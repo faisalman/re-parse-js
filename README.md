@@ -7,13 +7,30 @@ npm i re-parse-js
 
 ## Methods
 
-`use(re: Array<[RegExp[], (string | (string | RegExp | Function)[])[]]>): REParse`
+`use(re: ((RegExp[] | (string | (string | RegExp | Function)[])[])[])[]): REParse`
 
 `parse(str: string): {[key: string]: any}`
 
 ## Code Examples
 
+### General Schema
+
+```sh
+[
+    [K, V],
+    [K, V],
+    ...
+]
+
+where
+
+K => [ a list of RegExp instances ]
+V => [ a list of properties mapping ]
+```
+
 ### 1. Directly assign the captured match into result properties
+
+* Example 1.1: parsing user-agent
 
 ```js
 const regexes = [
@@ -40,6 +57,24 @@ re.parse(string1);
 // { browser: 'Mozilla', version: '5.0' }
 re.parse(string2);
 // { browser: 'Opera', version: '1.2', major: '1' }
+```
+
+* Example 1.2: parsing URL
+
+```js
+const regexes = [
+    [
+        [
+            /(https?):\/\/(\w+\.\w+)\/(.*)\?(.+)/
+        ],
+        ['protocol', 'host', 'path', 'query']
+    ]
+];
+const urlString = 'https://faisalman.com/?ref=github';
+
+const re = new REParse(regexes);
+re.parse(urlString);
+// { protocol: 'https', host: 'faisalman.com', path: '', query: 'ref=github' }
 ```
 
 ### 2. Post-process the captured match before assigning to result
