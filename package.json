@@ -1,16 +1,16 @@
 {
   "title": "REParse.js",
   "name": "re-parse-js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Faisal Salman <f@faisalman.com>",
   "description": "Compose a structured data from unstructured text using regex-based pattern matching",
   "type": "commonjs",
   "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.mjs",
+  "module": "./dist/esm/index.js",
   "exports": {
     ".": {
       "require": "./dist/cjs/index.js",
-      "import": "./dist/esm/index.mjs"
+      "import": "./dist/esm/index.js"
     }
   },
   "files": [
