@@ -1,10 +1,10 @@
-const { REParse } = require('../dist/cjs');
-const assert = require('assert');
+import { type REMap, REParse } from '../dist/esm';
+import assert from 'assert';
 
 describe('REParse', () => {
     describe('Direct assignment', () => {
         it('Directly assign the captured match into result properties', () => {   
-            const regexes = [
+            const remap: REMap = [
                 [
                     [
                         /(mozilla)\/([\d\.]+)/i, 
@@ -19,15 +19,24 @@ describe('REParse', () => {
                     ['browser', 'version', 'major']
                 ]
             ];
-            const string1 = 'Mozilla/5.0';
-            const string2 = 'Opera/1.2';
+            const ua1 = 'Mozilla/5.0';
+            const ua2 = 'Opera/1.2';
             
             const re = new REParse();
-            re.use(regexes);
-            assert.deepEqual(re.parse(string1), { browser: 'Mozilla', version: '5.0' });
-            assert.deepEqual(re.parse(string2), { browser: 'Opera', version: '1.2', major: '1' });
+            re.use(remap);
+            assert.deepEqual(re.parse(ua1), 
+                { 
+                    browser: 'Mozilla', 
+                    version: '5.0' 
+            });
+            assert.deepEqual(re.parse(ua2), 
+                { 
+                    browser: 'Opera', 
+                    version: '1.2', 
+                    major: '1' 
+            });
 
-            const regexes2 = [
+            const remap2: REMap = [
                 [
                     [
                         /(https?):\/\/(\w+\.\w+)\/(.*)\?(.*)/g
@@ -37,12 +46,18 @@ describe('REParse', () => {
             ];
             const urlString = 'https://faisalman.com/?ref=github';
             
-            const re2 = new REParse(regexes2);
-            assert.deepEqual(re2.parse(urlString), { protocol: 'https', host: 'faisalman.com', path: '', query: 'ref=github' });
+            const re2 = new REParse(remap2);
+            assert.deepEqual(re2.parse(urlString), 
+                { 
+                    protocol: 'https', 
+                    host: 'faisalman.com', 
+                    path: '', 
+                    query: 'ref=github' 
+            });
         });
 
         it('Direct value replacement', () => {   
-            const regexes = [
+            const remap: REMap = [
                 [
                     [
                         /(facebook)\/(\d+)/, 
@@ -52,12 +67,16 @@ describe('REParse', () => {
                     [['browser', 'Meta'], 'version'] // Always assign 'Meta' regardless matched value
                 ]
             ];
-            const string = 'facebook/100';            
-            assert.deepEqual(new REParse().use(regexes).parse(string), { browser: 'Meta', version: '100' });
+            const ua = 'facebook/100';            
+            assert.deepEqual(new REParse().use(remap).parse(ua), 
+                { 
+                    browser: 'Meta', 
+                    version: '100' 
+            });
         });
 
         it('Replace-based value replacement', () => {   
-            const regexes = [
+            const remap: REMap = [
                 [
                     [
                         /(comodo_dragon)\/(\d+)/i
@@ -65,13 +84,17 @@ describe('REParse', () => {
                     [['browser', /(\w+)_(\w{3})\w+/ig, '$1 $2cula'], 'version'] // Replace captured data, see string.replace
                 ]
             ];
-            const string = 'Comodo_Dragon/99';
-            assert.deepEqual(new REParse().use(regexes).parse(string), { browser: 'Comodo Dracula', version: '99' });
+            const ua = 'Comodo_Dragon/99';
+            assert.deepEqual(new REParse().use(remap).parse(ua), 
+                {
+                    browser: 'Comodo Dracula', 
+                    version: '99' 
+            });
         });
 
         it('Function-based value replacement', () => {   
             const lowerize = str => str.toLowerCase();
-            const regexes = [
+            const remap: REMap = [
                 [
                     [
                         /(ARM)(64)/
@@ -85,9 +108,13 @@ describe('REParse', () => {
                     ['arch', 'bitness'] // Direct assignment
                 ]
             ];
-            const string = 'ARM64';
+            const ua = 'ARM64';
             
-            assert.deepEqual(new REParse().use(regexes).parse(string), { arch: 'arm', bitness: '64' });
+            assert.deepEqual(new REParse().use(remap).parse(ua), 
+                { 
+                    arch: 'arm', 
+                    bitness: '64' 
+            });
         });
 
         it('Return empty object when no match was found', () => {

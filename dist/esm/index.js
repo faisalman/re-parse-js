@@ -5,39 +5,39 @@
     Author: Faisal Salman <f@faisalman.com>
     MIT License */
 export class REParse {
-    constructor(re) {
-        this.regexes = null;
-        if (re) {
-            this.use(re);
+    constructor(remap) {
+        this.remap = null;
+        if (remap) {
+            this.use(remap);
         }
         return this;
     }
-    use(re) {
-        this.regexes = re;
+    use(remap) {
+        this.remap = remap;
         return this;
     }
     parse(str) {
-        if (!this.regexes) {
-            throw new Error('RegexMap: Expect Array of RegExp');
+        if (!this.remap) {
+            throw new Error('REMap not set');
         }
         let res = {};
-        for (const [regs, props] of this.regexes) {
-            if (!Array.isArray(regs)) {
-                throw new Error('RegexMap: Expect Array of RegExp');
+        for (const [regexes, mapper] of this.remap) {
+            if (!Array.isArray(regexes)) {
+                throw new Error('REMap: Expect Array of RegExp');
             }
-            if (!Array.isArray(props)) {
-                throw new Error('RegexMap: Expect Array for Properties Map');
+            if (!Array.isArray(mapper)) {
+                throw new Error('REMap: Expect Array for Properties Map');
             }
-            for (const reg of regs) {
-                if (reg instanceof RegExp) {
-                    const matches = reg.exec(str);
+            for (const regex of regexes) {
+                if (regex instanceof RegExp) {
+                    const matches = regex.exec(str);
                     if (matches) {
-                        props.forEach((prop, idx) => {
+                        mapper.forEach((prop, idx) => {
                             const val = matches[idx + 1];
                             if (Array.isArray(prop)) {
                                 const key = prop[0];
                                 if (typeof key !== 'string') {
-                                    throw new Error('RegexMap: Expect String Input');
+                                    throw new Error('REMap: Expect String Input');
                                 }
                                 if (prop.length == 2) {
                                     if (typeof prop[1] === 'string') {
@@ -76,7 +76,7 @@ export class REParse {
                     }
                 }
                 else {
-                    throw new Error('RegexMap: Expect RegExp Instance');
+                    throw new Error('REMap: Expect RegExp Instance');
                 }
             }
         }

@@ -4,14 +4,36 @@
     https://github.com/faisalman/re-parse-js
     Author: Faisal Salman <f@faisalman.com>
     MIT License */
-type RegexMap = ((RegExp[] | (string | (string | RegExp | Function)[])[])[])[];
-interface ResultObj {
+export type REMap = [
+    RegExp[],
+    (string | [
+        string,
+        string
+    ] | [
+        string,
+        Function
+    ] | [
+        string,
+        Function,
+        any
+    ] | [
+        string,
+        RegExp,
+        string
+    ] | [
+        string,
+        RegExp,
+        string,
+        Function
+    ])[]
+][];
+interface REsult {
     [key: string]: any;
 }
 export declare class REParse {
-    private regexes;
-    constructor(re?: RegexMap);
-    use(re: RegexMap): REParse;
-    parse(str: string): ResultObj;
+    private remap;
+    constructor(remap?: REMap);
+    use(remap: REMap): REParse;
+    parse(str: string): REsult;
 }
 export {};

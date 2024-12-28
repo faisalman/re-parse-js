@@ -7,50 +7,58 @@
     MIT License */
 ////////////////////////////////////////////////////
 
-type RegexMap = ((RegExp[] | (string | (string | RegExp | Function)[])[])[])[];
+export type REMap = [RegExp[], 
+                        (   string |                            // prop = $match 
+                            [string, string] |                  // prop = string
+                            [string, Function] |                // prop = func($match)
+                            [string, Function, any] |           // prop = func($match, arg)
+                            [string, RegExp, string] |          // prop = $match.replace(regex, string)
+                            [string, RegExp, string, Function]  // prop = func($match.replace(regex, string))
+                        )[]
+                    ][];
 
-interface ResultObj {
+interface REsult {
     [key: string]: any;
 }
 
 export class REParse {
 
-    private regexes: RegexMap | null = null;
+    private remap: REMap | null = null;
 
-    constructor(re?: RegexMap) {
-        if (re) {
-            this.use(re);
+    constructor(remap?: REMap) {
+        if (remap) {
+            this.use(remap);
         }
         return this;
     }
 
-    use(re: RegexMap): REParse {
-        this.regexes = re;
+    use(remap: REMap): REParse {
+        this.remap = remap;
         return this;
     }
 
-    parse(str: string): ResultObj {
-        if (!this.regexes) {
-            throw new Error('RegexMap: Expect Array of RegExp');
+    parse(str: string): REsult {
+        if (!this.remap) {
+            throw new Error('REMap not set');
         }
-        let res: ResultObj = {};
-        for (const [regs, props] of this.regexes) {
-            if (!Array.isArray(regs)) {
-                throw new Error('RegexMap: Expect Array of RegExp');
+        let res: REsult = {};
+        for (const [regexes, mapper] of this.remap) {
+            if (!Array.isArray(regexes)) {
+                throw new Error('REMap: Expect Array of RegExp');
             }
-            if (!Array.isArray(props)) {
-                throw new Error('RegexMap: Expect Array for Properties Map');
+            if (!Array.isArray(mapper)) {
+                throw new Error('REMap: Expect Array for Properties Map');
             }
-            for (const reg of regs) {
-                if (reg instanceof RegExp) {
-                    const matches = reg.exec(str);
+            for (const regex of regexes) {
+                if (regex instanceof RegExp) {
+                    const matches = regex.exec(str);
                     if (matches) {
-                        props.forEach((prop, idx) => {
+                        mapper.forEach((prop, idx) => {
                             const val = matches[idx+1];
                             if (Array.isArray(prop)) {
                                 const key = prop[0];
                                 if (typeof key !== 'string') {
-                                    throw new Error('RegexMap: Expect String Input');
+                                    throw new Error('REMap: Expect String Input');
                                 }
                                 if (prop.length == 2) {
                                     if (typeof prop[1] === 'string') {
@@ -81,7 +89,7 @@ export class REParse {
                         if (res) return res;
                     }
                 } else {
-                    throw new Error('RegexMap: Expect RegExp Instance');
+                    throw new Error('REMap: Expect RegExp Instance');
                 }
             }
         }

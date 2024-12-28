@@ -7,9 +7,9 @@ npm i re-parse-js
 
 ## Methods
 
-`use(re: ((RegExp[] | (string | (string | RegExp | Function)[])[])[])[]): REParse`
+`use(re: [RegExp[], REMapper[]][]): REParse`
 
-`parse(str: string): {[key: string]: any}`
+`parse(str: string): REsult`
 
 ## Code Examples
 
@@ -17,15 +17,27 @@ npm i re-parse-js
 
 ```sh
 [
-    [K, V],
-    [K, V],
+    [
+        RegExp[], 
+        REMapper[]
+    ],
+    [
+        RegExp[], 
+        REMapper[]
+    ],
     ...
 ]
 
 where
 
-K => [ a list of RegExp instances ]
-V => [ a list of properties mapping ]
+RegExp[] => [ a list of RegExp instances that capture the values ]
+REMapper[] => [ a list of rules on how to map the captured values into result properties ]
+    - string                                # prop = $match 
+    - [string, string]                      # prop = string
+    - [string, Function]                    # prop = func($match)
+    - [string, Function, any]               # prop = func($match, arg)
+    - [string, RegExp, string]              # prop = $match.replace(regex, string)
+    - [string, RegExp, string, Function]    # prop = func($match.replace(regex, string))
 ```
 
 ### 1. Directly assign the captured match into result properties
@@ -33,7 +45,7 @@ V => [ a list of properties mapping ]
 * Example 1.1: parsing user-agent
 
 ```js
-const regexes = [
+const remap = [
     [
         [
             /(mozilla)\/([\d\.]+)/i, 
@@ -48,21 +60,21 @@ const regexes = [
         ['browser', 'version', 'major']
     ]
 ];
-const string1 = 'Mozilla/5.0';
-const string2 = 'Opera/1.2';
+const str1 = 'Mozilla/5.0';
+const str2 = 'Opera/1.2';
 
 const re = new REParse();
-re.use(regexes);
-re.parse(string1);
+re.use(remap);
+re.parse(str1);
 // { browser: 'Mozilla', version: '5.0' }
-re.parse(string2);
+re.parse(str2);
 // { browser: 'Opera', version: '1.2', major: '1' }
 ```
 
 * Example 1.2: parsing URL
 
 ```js
-const regexes = [
+const remap = [
     [
         [
             /(https?):\/\/(\w+\.\w+)\/(.*)\?(.+)/
@@ -72,7 +84,7 @@ const regexes = [
 ];
 const urlString = 'https://faisalman.com/?ref=github';
 
-const re = new REParse(regexes);
+const re = new REParse(remap);
 re.parse(urlString);
 // { protocol: 'https', host: 'faisalman.com', path: '', query: 'ref=github' }
 ```
@@ -82,7 +94,7 @@ re.parse(urlString);
 #### A. Direct value replacement
 
 ```js
-const regexes = [
+const remap = [
     [
         [
             /(facebook)\/(\d+)/, 
@@ -92,16 +104,16 @@ const regexes = [
         [['browser', 'Meta'], 'version'] // Always assign 'Meta' regardless matched value
     ]
 ];
-const string = 'facebook/100';
+const str = 'facebook/100';
 
-new REParse().use(regexes).parse(string);
+new REParse().use(remap).parse(str);
 // { browser: 'Meta', version: '100' }
 ```
 
 #### B. Replace-based value replacement
 
 ```js
-const regexes = [
+const remap = [
     [
         [
             /(comodo_dragon)\/(\d+)/i
@@ -109,9 +121,9 @@ const regexes = [
         [['browser', /(\w+)_(\w{3})\w+/ig, '$1 $2cula'], 'version'] // Replace captured data, see string.replace
     ]
 ];
-const string = 'Comodo_Dragon/99';
+const str = 'Comodo_Dragon/99';
 
-new REParse().use(regexes).parse(string);
+new REParse().use(remap).parse(str);
 // { browser: 'Comodo Dracula', version: '99' }
 ```
 
@@ -119,7 +131,7 @@ new REParse().use(regexes).parse(string);
 
 ```js
 const lowerize = str => str.toLowerCase();
-const regexes = [
+const remap = [
     [
         [
             /(ARM)(64)/
@@ -133,17 +145,20 @@ const regexes = [
         ['arch', 'bitness'] // Direct assignment
     ]
 ];
-const string = 'ARM';
+const str1 = 'ARM';
+const str2 = 'x86-64';
 
-new REParse().use(regexes).parse(string);
-// { arch: 'arm', bitness: '64' }
+const re = new REParse()
+re.use(remap)
+re.parse(str1); // { arch: 'arm', bitness: '64' }
+re.parse(str2); // { arch: 'x86', bitness: '64' }
 ```
 
 # License
 
 MIT License
 
-Copyright (c) 2023 Faisal Salman <<f@faisalman.com>>
+Copyright (c) 2023-2025 Faisal Salman <<f@faisalman.com>>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

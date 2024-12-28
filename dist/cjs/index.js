@@ -8,40 +8,40 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.REParse = void 0;
 var REParse = (function () {
-    function REParse(re) {
-        this.regexes = null;
-        if (re) {
-            this.use(re);
+    function REParse(remap) {
+        this.remap = null;
+        if (remap) {
+            this.use(remap);
         }
         return this;
     }
-    REParse.prototype.use = function (re) {
-        this.regexes = re;
+    REParse.prototype.use = function (remap) {
+        this.remap = remap;
         return this;
     };
     REParse.prototype.parse = function (str) {
-        if (!this.regexes) {
-            throw new Error('RegexMap: Expect Array of RegExp');
+        if (!this.remap) {
+            throw new Error('REMap not set');
         }
         var res = {};
-        for (var _i = 0, _a = this.regexes; _i < _a.length; _i++) {
-            var _b = _a[_i], regs = _b[0], props = _b[1];
-            if (!Array.isArray(regs)) {
-                throw new Error('RegexMap: Expect Array of RegExp');
+        for (var _i = 0, _a = this.remap; _i < _a.length; _i++) {
+            var _b = _a[_i], regexes = _b[0], mapper = _b[1];
+            if (!Array.isArray(regexes)) {
+                throw new Error('REMap: Expect Array of RegExp');
             }
-            if (!Array.isArray(props)) {
-                throw new Error('RegexMap: Expect Array for Properties Map');
+            if (!Array.isArray(mapper)) {
+                throw new Error('REMap: Expect Array for Properties Map');
             }
-            var _loop_1 = function (reg) {
-                if (reg instanceof RegExp) {
-                    var matches_1 = reg.exec(str);
+            var _loop_1 = function (regex) {
+                if (regex instanceof RegExp) {
+                    var matches_1 = regex.exec(str);
                     if (matches_1) {
-                        props.forEach(function (prop, idx) {
+                        mapper.forEach(function (prop, idx) {
                             var val = matches_1[idx + 1];
                             if (Array.isArray(prop)) {
                                 var key = prop[0];
                                 if (typeof key !== 'string') {
-                                    throw new Error('RegexMap: Expect String Input');
+                                    throw new Error('REMap: Expect String Input');
                                 }
                                 if (prop.length == 2) {
                                     if (typeof prop[1] === 'string') {
@@ -80,12 +80,12 @@ var REParse = (function () {
                     }
                 }
                 else {
-                    throw new Error('RegexMap: Expect RegExp Instance');
+                    throw new Error('REMap: Expect RegExp Instance');
                 }
             };
-            for (var _c = 0, regs_1 = regs; _c < regs_1.length; _c++) {
-                var reg = regs_1[_c];
-                var state_1 = _loop_1(reg);
+            for (var _c = 0, regexes_1 = regexes; _c < regexes_1.length; _c++) {
+                var regex = regexes_1[_c];
+                var state_1 = _loop_1(regex);
                 if (typeof state_1 === "object")
                     return state_1.value;
             }
